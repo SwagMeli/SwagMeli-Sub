@@ -1,0 +1,29 @@
+name: SwagMeli Config Scanner
+
+on:
+  schedule:
+    - cron: '0 * * * *' # هر یک ساعت یک‌بار اجرا می‌شود
+  workflow_dispatch: # اجازه می‌دهد به صورت دستی هم اجرا کنی
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Run Scanner
+        run: python Trash/scanner_v2.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add main/final.txt
+          git commit -m "Update final configs [Automated]" || exit 0
+          git push

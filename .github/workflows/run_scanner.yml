@@ -1,0 +1,43 @@
+name: SwagMeli Scanner Runner
+
+on:
+  schedule:
+    - cron: '0 * * * *' # هر یک ساعت خودکار
+  workflow_dispatch: # اجرای دستی با دکمه
+
+permissions:
+  contents: write
+
+jobs:
+  run-scanner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Run Scanner Only
+        run: |
+          # ساخت پوشه خروجی اگه وجود نداشته باشه
+          mkdir -p main
+          # اجرای دقیق فایل اسکنر تو
+          python3 Trash/scanner_v2.py
+
+      - name: Push Results to Main Folder
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # فقط فایل خروجی رو اضافه کن
+          git add main/final.txt
+          
+          # اگه تغییری بود کامیت کن، اگه نبود ارور نده
+          git commit -m "Update final.txt" || exit 0
+          
+          # آپدیت نهایی
+          git pull --rebase origin main
+          git push origin main
